@@ -1,0 +1,24 @@
+# Demo local de un repositorio propio y confiable. El socket permite administrar Docker.
+# No ejecutar PRs externos o repositorios no confiables en este runner.
+services:
+  runner:
+    image: ultimashop-runner:local
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.runner
+    restart: unless-stopped
+    environment:
+      GITEA_INSTANCE_URL: http://gitea:3000/
+      GITEA_RUNNER_REGISTRATION_TOKEN: ${GITEA_RUNNER_REGISTRATION_TOKEN:?Definir token privado}
+    volumes:
+      - runner-data:/data
+      - runner-maven:/root/.m2
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      gitea:
+        condition: service_healthy
+volumes:
+  runner-data:
+    name: ultimashop-runner-data
+  runner-maven:
+    name: ultimashop-runner-maven

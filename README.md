@@ -3,21 +3,23 @@
 Gestor de inventario, ventas y servicios para emprendedores. Proyecto académico de Proaula y DevOps en Java 21, Spring Boot, Thymeleaf y PostgreSQL.
 
 ## Módulos
-- Dashboard con consultas comerciales provisionales.
+- Dashboard con proyección asíncrona del worker y consultas operativas de stock.
 - Inventario: productos, entradas, ajustes y existencias.
 - Servicios de precio fijo.
 - Ventas de productos y servicios, con control de stock e idempotencia.
 - Historial de movimientos y autenticación con sesión.
 
-Una venta registra sus detalles, stock, movimientos y evento outbox en una transacción. El worker RabbitMQ y el resumen asíncrono todavía requieren integración y verificación. No se presentan como completados.
+Una venta registra sus detalles, stock, movimientos y evento outbox en una transacción. El worker publica en RabbitMQ con confirmaciones y alimenta dos consumidores idempotentes: comprobantes internos y resumen diario. Ver `docs/DEMO_PARCIAL.md` para la demostración y evidencia real.
 
 ## Estructura
 | Carpeta | Contenido |
 |---|---|
 | `api/` | Aplicación Java, interfaz, migraciones y pruebas |
+| `worker/` | Publicador outbox, consumidores y seis pruebas de integración |
 | `local-dev/` | PostgreSQL local, plantillas de configuración e instrucciones |
 | `infra/` | Dockerfile, overlay API y ejemplo de Render |
-| `.github/workflows/` | Compilación, pruebas y construcción de imagen |
+| `.github/workflows/` | Compilación, pruebas y construcción de imágenes en GitHub |
+| `.gitea/workflows/` | Pipeline del repositorio y runner locales de Gitea |
 | `docs/` | Estado de entrega y comprobaciones |
 
 La referencia visual `ultima-store`, secretos, logs y archivos compilados quedan excluidos del repositorio.
@@ -40,4 +42,4 @@ GitHub Actions verifica Java, ejecuta las pruebas y construye la imagen en pushe
 ## Estado y límites
 Verificación local del 19 de noviembre de 2026: 39 pruebas correctas en una copia aislada; imagen construida y arrancada contra PostgreSQL temporal, con salud UP y API protegida. Esto no sustituye la ejecución del workflow remoto ni valida cambios posteriores.
 
-Render tiene una plantilla revisable, todavía sin despliegue. GitHub Actions no sustituye Gitea si el parcial exige esa herramienta. No se implementan pagos, facturación electrónica legal, múltiples negocios o anulaciones. Consultar `docs/ENTREGA_DEVOPS.md` para pendientes y pasos de demostración.
+Render tiene una plantilla revisable, todavía sin despliegue. Gitea y su runner se montan localmente con persistencia; su workflow verifica API y worker antes de construir imágenes. No se implementan pagos, facturación electrónica legal, múltiples negocios o anulaciones. Consultar `docs/DEMO_PARCIAL.md` y `docs/ENTREGA_DEVOPS.md` para evidencia y pendientes.

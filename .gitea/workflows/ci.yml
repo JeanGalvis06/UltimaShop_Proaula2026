@@ -1,0 +1,29 @@
+name: Ultima Shop Gitea Java Docker
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  verificar:
+    runs-on: ultimashop
+    timeout-minutes: 30
+    env:
+      MAIL_ENABLED: 'false'
+      TESTCONTAINERS_HOST_OVERRIDE: host.docker.internal
+    steps:
+      - name: Descargar codigo del commit desde Gitea local
+        run: |
+          git clone http://gitea:3000/jean/UltimaShop.git codigo
+          cd codigo
+          git checkout "$GITHUB_SHA"
+      - name: Verificar API con PostgreSQL aislado
+        working-directory: codigo/api
+        run: bash ./mvnw -B -ntp clean verify
+      - name: Verificar worker con PostgreSQL y RabbitMQ aislados
+        working-directory: codigo/worker
+        run: bash ../api/mvnw -B -ntp clean verify
+      - name: Construir imagenes identificadas por commit
+        working-directory: codigo
+        run: |
+          docker build -f infra/Dockerfile.api -t "ultimashop-api:gitea-$GITHUB_SHA" .
+          docker build -f infra/Dockerfile.worker -t "ultimashop-worker:gitea-$GITHUB_SHA" .

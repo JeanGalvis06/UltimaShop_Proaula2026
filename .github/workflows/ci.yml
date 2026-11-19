@@ -40,6 +40,11 @@ jobs:
         run: bash ./mvnw -B -ntp clean verify
       - name: Construir imagen sin publicar
         run: docker build --file infra/Dockerfile.api --tag ultimashop-api:ci .
+      - name: Probar worker con PostgreSQL y RabbitMQ reales
+        working-directory: worker
+        run: bash ../api/mvnw -B -ntp clean verify
+      - name: Construir imagen worker
+        run: docker build --file infra/Dockerfile.worker --tag ultimashop-worker:ci .
 
   publicar:
     if: github.event_name == 'workflow_dispatch' && inputs.publicar_imagen && github.ref == 'refs/heads/main'

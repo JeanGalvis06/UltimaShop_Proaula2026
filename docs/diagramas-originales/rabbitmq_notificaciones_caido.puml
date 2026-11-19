@@ -1,0 +1,39 @@
+@startuml rabbitmq_notificaciones_caido
+title Qué pasa si el sistema de notificaciones está caído
+
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam ArrowColor #444444
+skinparam note {
+  BackgroundColor #FFF8DC
+  BorderColor #B8A04A
+}
+skinparam sequence {
+  ParticipantBackgroundColor #F5F9FF
+  ParticipantBorderColor #3B6EA8
+}
+
+participant "Sistema de ventas\n(Producer)" as V
+participant "RabbitMQ\n(Exchange y colas)" as R
+participant "Inventario\n(Consumer)" as I
+participant "Facturación\n(Consumer)" as F
+participant "Notificaciones\n(Consumer)" as N #FFE4E1
+
+== Funcionamiento normal de la venta ==
+V -> R : Publica VentaRegistrada
+R -> R : Copia el mensaje a las 3 colas
+R -> I : Entrega mensaje
+I --> R : ack (procesado)
+R -> F : Entrega mensaje
+F --> R : ack (procesado)
+
+== Notificaciones está CAÍDO ==
+R -x N : No hay consumidor disponible
+V -> V : La venta ya está confirmada\n(no espera a Notificaciones)
+
+== Notificaciones se recupera ==
+N -> R : Se reconecta a su cola
+R -> N : Entrega los mensajes pendientes
+N --> R : ack (procesado)
+
+@enduml

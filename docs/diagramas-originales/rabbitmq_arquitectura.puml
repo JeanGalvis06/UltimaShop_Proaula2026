@@ -1,0 +1,53 @@
+@startuml rabbitmq_arquitectura
+title Comunicación con RabbitMQ: quién produce y quién consume
+
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam ArrowColor #444444
+skinparam rectangle {
+  BackgroundColor #F5F9FF
+  BorderColor #3B6EA8
+}
+skinparam queue {
+  BackgroundColor #EAF6EA
+  BorderColor #4C9A4C
+}
+skinparam package {
+  BackgroundColor #FAFAFA
+  BorderColor #888888
+}
+skinparam note {
+  BackgroundColor #FFF8DC
+  BorderColor #B8A04A
+}
+
+left to right direction
+
+rectangle "Sistema de ventas\n(PRODUCER)" as ventas
+
+package "RabbitMQ - broker de mensajes" {
+  rectangle "Exchange topic\nventas.events" as ex
+  queue "Cola\ninventario.queue" as q1
+  queue "Cola\nfacturacion.queue" as q2
+  queue "Cola\nnotificaciones.queue" as q3
+}
+
+rectangle "Sistema de inventario\n(CONSUMER)" as inv
+rectangle "Sistema de facturación\n(CONSUMER)" as fac
+rectangle "Sistema de notificaciones\n(CONSUMER)" as not
+
+ventas --> ex : 1. publica el evento\nVentaRegistrada\n(clave: venta.registrada)
+ex --> q1 : 2. binding
+ex --> q2 : 2. binding
+ex --> q3 : 2. binding
+q1 --> inv : 3. entrega el mensaje
+q2 --> fac : 3. entrega el mensaje
+q3 --> not : 3. entrega el mensaje
+
+note bottom of ex
+  El Exchange no guarda mensajes:
+  los reparte a las colas según
+  la clave de enrutamiento.
+end note
+
+@enduml

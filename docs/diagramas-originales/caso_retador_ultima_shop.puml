@@ -1,0 +1,54 @@
+@startuml caso_retador_ultima_shop
+title Caso retador: ciclo de vida de la API Spring Boot de Ultima Shop
+
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam ArrowColor #444444
+skinparam rectangle {
+  BackgroundColor #F5F9FF
+  BorderColor #3B6EA8
+}
+skinparam package {
+  BackgroundColor #FAFAFA
+  BorderColor #888888
+}
+skinparam note {
+  BackgroundColor #FFF8DC
+  BorderColor #B8A04A
+}
+
+actor "Desarrollador" as dev
+
+package "ETAPA 1 - Entrega del software" {
+  rectangle "Gitea\n(repositorio Git)\napi/ - worker/ - infra/" as gitea
+  rectangle "Pipeline CI/CD\n(Gitea Actions)\nmvn verify -> construir -> publicar" as pipe
+  rectangle "Docker\nimagen de la API\ny del worker" as docker
+  rectangle "Registro de imágenes\n(una versión por commit)" as registry
+}
+
+package "ETAPA 2 - Ejecución en la nube" {
+  rectangle "Render\nejecuta la imagen\nde la API" as render
+  rectangle "API Spring Boot\n(ventas, inventario)" as api
+  database "PostgreSQL\nventa + stock + outbox\n(misma transacción)" as pg
+}
+
+package "ETAPA 3 - Comunicación entre microservicios" {
+  rectangle "Worker\n(publica el evento\ndesde la outbox)" as worker
+  queue "RabbitMQ\nexchange ultima.events\nclave venta.registrada" as rmq
+  rectangle "Servicio de comprobantes\n(cola ultima.comprobantes)" as svc1
+  rectangle "Servicio de dashboard\n(cola ultima.dashboard)" as svc2
+}
+
+dev --> gitea : 1. commit y push\n(PR aprobado)
+gitea --> pipe : 2. dispara el workflow
+pipe --> docker : 3. si las pruebas pasan,\nconstruye la imagen
+docker --> registry : 4. publica con la\netiqueta del commit
+registry --> render : 5. aprobación manual y\ndeploy hook / API de Render
+render --> api : 6. despliega y ejecuta
+api --> pg : 7. guarda venta,\nstock y outbox
+pg --> worker : 8. lee eventos\npendientes
+worker --> rmq : 9. publica\nVentaRegistrada
+rmq --> svc1 : 10. entrega el evento
+rmq --> svc2 : 10. entrega el evento
+
+@enduml

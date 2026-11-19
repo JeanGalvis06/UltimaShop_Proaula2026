@@ -1,0 +1,7 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/main :: pagina('Integración', 'dashboard', ~{::contenido})}">
+<section th:fragment="contenido">
+ <div class="page-heading"><div><h1>Integración de eventos</h1><p>Estado real de outbox y de las proyecciones procesadas por el worker.</p></div><a class="primary" th:href="@{/integracion}">Actualizar</a></div>
+ <div class="stats"><div class="stat"><span>Eventos pendientes</span><strong th:text="${estado.pendientes}"></strong></div><div class="stat"><span>Publicados en RabbitMQ</span><strong th:text="${estado.publicados}"></strong></div><div class="stat"><span>Comprobantes generados</span><strong th:text="${estado.comprobantes}"></strong></div><div class="stat"><span>Ventas proyectadas</span><strong th:text="${estado.ventasProyectadas}"></strong></div></div>
+ <div class="panel" style="padding:24px"><p>Fuente del dashboard: <strong th:text="${estado.fuenteDashboard}"></strong></p><p>Última actualización del resumen: <span th:text="${estado.actualizadoEn ?: 'Todavía sin eventos procesados'}"></span></p><p>La proyección es eventual. Un evento publicado puede seguir esperando a su consumidor.</p><a class="secondary" th:href="@{/dashboard}">Volver al dashboard</a></div>
+</section></html>

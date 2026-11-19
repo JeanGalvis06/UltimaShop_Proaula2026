@@ -1,8 +1,13 @@
 **
 !api/
 !api/**
+!worker/
+!worker/**
 !infra/
 !infra/Dockerfile.api
+!infra/Dockerfile.worker
+!infra/Dockerfile.runner
+!infra/runner-entrypoint.sh
 **/target/
 **/.env
 **/.env.*

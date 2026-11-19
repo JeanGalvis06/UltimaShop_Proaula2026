@@ -139,8 +139,9 @@
     <div class="bottom-note">
         <svg class="icono"><use href="#i-refresh"></use></svg>
         <div>
-            <strong>Resumen provisional sobre tablas operativas</strong>
-            <p>Este panel consulta ventas, productos y movimientos directamente. No simula eventos procesados ni comprobantes del worker. El proveedor es reemplazable cuando Lewis entregue el resumen asíncrono.</p>
+            <strong>Origen del resumen y procesamiento de eventos</strong>
+            <p>El resumen puede actualizarse de forma asíncrona mediante RabbitMQ. Stock y movimientos siempre se consultan desde las tablas operativas.</p>
+            <a class="text-button" th:href="@{/integracion}">Ver estado real de integración</a>
         </div>
     </div>
 </section>

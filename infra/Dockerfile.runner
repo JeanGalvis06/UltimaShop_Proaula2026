@@ -1,0 +1,8 @@
+FROM gitea/act_runner:latest AS runner
+FROM eclipse-temurin:21-jdk-jammy
+RUN apt-get update && apt-get install -y --no-install-recommends git curl unzip docker.io ca-certificates && rm -rf /var/lib/apt/lists/*
+COPY --from=runner /usr/local/bin/act_runner /usr/local/bin/act_runner
+COPY infra/runner-entrypoint.sh /usr/local/bin/runner-entrypoint.sh
+RUN sed -i 's/\r$//' /usr/local/bin/runner-entrypoint.sh && chmod +x /usr/local/bin/runner-entrypoint.sh
+WORKDIR /data
+ENTRYPOINT ["/usr/local/bin/runner-entrypoint.sh"]

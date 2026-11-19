@@ -1,0 +1,47 @@
+# Combine after local-dev/compose.yaml and infra/compose.api.yaml.
+services:
+  api:
+    environment:
+      ULTIMASHOP_DASHBOARD_FUENTE: worker
+  rabbitmq:
+    image: rabbitmq:4-management
+    restart: unless-stopped
+    hostname: ultimashop-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBIT_USER:?Definir RABBIT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBIT_PASSWORD:?Definir RABBIT_PASSWORD}
+    ports:
+      - "127.0.0.1:5672:5672"
+      - "127.0.0.1:15672:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 90s
+  worker:
+    image: ultimashop-worker:local
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.worker
+    restart: unless-stopped
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-ultimashop_dev}
+      DB_USER: ${DB_USER:-ultimashop_app}
+      DB_PASSWORD: ${DB_PASSWORD:?Definir DB_PASSWORD}
+      RABBIT_HOST: rabbitmq
+      RABBIT_USER: ${RABBIT_USER:?Definir RABBIT_USER}
+      RABBIT_PASSWORD: ${RABBIT_PASSWORD:?Definir RABBIT_PASSWORD}
+      SERVER_PORT: "8082"
+    ports:
+      - "127.0.0.1:8082:8082"
+    depends_on:
+      api:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+volumes:
+  rabbitmq-data:
+    name: ultimashop-rabbitmq-data

@@ -9,6 +9,7 @@
             <p th:text="${venta.fecha} + ' · ' + ${venta.estado} + ' · Moneda ' + ${venta.moneda}">Fecha</p>
         </div>
         <div class="heading-actions">
+            <a class="primary" th:href="@{/ventas/{id}/comprobante(id=${venta.id})}">Ver comprobante</a>
             <a class="secondary" th:href="@{/ventas}">Volver al historial</a>
         </div>
     </div>

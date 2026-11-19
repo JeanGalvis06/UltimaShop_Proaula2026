@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/main :: pagina('Comprobante', 'ventas', ~{::contenido})}">
+<section th:fragment="contenido">
+ <div class="page-heading"><div><h1>Comprobante de venta</h1><p>Documento interno académico. No es una factura electrónica.</p></div><a class="secondary" th:href="@{/ventas/{id}(id=${venta.id})}">Volver a la venta</a></div>
+ <div class="panel" style="padding:24px" th:if="${comprobante == null}"><h2>Procesamiento pendiente</h2><p>El worker generará el comprobante al recibir el evento de esta venta.</p><a class="primary" th:href="@{/ventas/{id}/comprobante(id=${venta.id})}">Actualizar</a></div>
+ <div class="panel" style="padding:24px" th:if="${comprobante != null}">
+  <h2 th:text="${comprobante.numero}"></h2><p>Comprobante generado por el consumidor de RabbitMQ.</p>
+  <p th:text="'Venta #' + ${venta.id} + ' · ' + ${venta.fecha}"></p>
+  <table class="tabla"><thead><tr><th>Concepto</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th></tr></thead><tbody><tr th:each="item : ${venta.items}"><td th:text="${item.nombre}"></td><td th:text="${item.cantidad}"></td><td th:text="${item.precioUnitario}"></td><td th:text="${item.subtotal}"></td></tr></tbody></table>
+  <h2 th:text="'Total COP ' + ${venta.total}"></h2>
+ </div>
+</section></html>

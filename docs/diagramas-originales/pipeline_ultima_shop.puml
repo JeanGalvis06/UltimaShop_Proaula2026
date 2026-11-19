@@ -1,0 +1,72 @@
+@startuml pipeline_ultima_shop
+title Pipeline CI/CD de Ultima Shop (Gitea Actions)
+
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam ArrowColor #444444
+skinparam activity {
+  BackgroundColor #F5F9FF
+  BorderColor #3B6EA8
+}
+skinparam note {
+  BackgroundColor #FFF8DC
+  BorderColor #B8A04A
+}
+
+|Desarrollador|
+start
+:Hace un cambio en el código
+(api/, worker/ o infra/);
+:Commit en una rama de trabajo
+y push a Gitea;
+:Abre un Pull Request hacia main;
+
+|Gitea|
+:Revisión y aprobación del Pull Request
+(rama main protegida);
+:Merge a main;
+:El push a main dispara
+el workflow de Gitea Actions;
+
+|Runner de Gitea Actions|
+:Descarga el código del repositorio;
+:Etapa 1 - Compilar y probar
+mvn verify (api y worker);
+
+if (¿Pruebas y compilación OK?) then (sí)
+  :Etapa 2 - Construir imágenes Docker
+  (API y worker);
+  :Etapa 3 - Etiquetar con el
+  hash del commit;
+  :Etapa 4 - Publicar las imágenes;
+
+  |Registro de imágenes|
+  :Guarda las imágenes
+  (una versión por commit);
+
+  |Gitea|
+  :Espera aprobación manual
+  del despliegue;
+
+  |Render|
+  :Se activa el despliegue
+  (API de Render o deploy hook);
+  :Render descarga la imagen
+  preconstruida y la ejecuta;
+  :Comprobación de salud
+  /actuator/health;
+  
+  stop
+  
+else (no)
+  |Runner de Gitea Actions|
+  :Pipeline se detiene.
+  No se publica ni se despliega nada;
+
+  |Desarrollador|
+  :Recibe la notificación de fallo,
+  corrige y vuelve a hacer push;
+  stop
+endif
+
+@enduml
