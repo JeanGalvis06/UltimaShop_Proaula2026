@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Activar cuenta — Ultima Shop</title>
+    <link rel="stylesheet" th:href="@{/css/tokens.css}">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body class="pagina-login">
+<main class="login-contenedor">
+    <section class="panel login-panel" aria-labelledby="invitacion-titulo">
+        <div class="panel-body">
+            <span class="eyebrow">INVITACIÓN</span>
+            <h1 id="invitacion-titulo">Activar cuenta</h1>
+            <p class="help">Verifique su correo, confirme su nombre y establezca una contraseña para acceder a Ultima Shop.</p>
+
+            <div class="banner error" th:if="${error}" role="alert" th:text="${error}"></div>
+
+            <form th:action="@{/invitacion}" method="post" class="login-formulario">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <input type="hidden" name="token" th:value="${token}">
+                <div class="fields">
+                    <label class="wide">
+                        <span>Nombre</span>
+                        <input type="text" name="nombre" th:value="${nombre}" maxlength="120" required>
+                    </label>
+                    <label class="wide">
+                        <span>Nueva contraseña</span>
+                        <input type="password" name="password" autocomplete="new-password" minlength="8" maxlength="72" required>
+                    </label>
+                    <label class="wide">
+                        <span>Confirmar contraseña</span>
+                        <input type="password" name="confirmarPassword" autocomplete="new-password" minlength="8" maxlength="72" required>
+                    </label>
+                </div>
+                <div class="form-actions">
+                    <button class="primary" type="submit">Activar cuenta</button>
+                </div>
+            </form>
+        </div>
+        <div class="panel-foot">
+            <span>El enlace solo puede usarse una vez.</span>
+        </div>
+    </section>
+</main>
+</body>
+</html>

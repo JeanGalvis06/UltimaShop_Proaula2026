@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: pagina('Nueva venta', 'ventas', ~{::contenido})}">
+<section th:fragment="contenido" aria-labelledby="venta-form-titulo">
+    <div class="page-heading">
+        <div>
+            <span class="eyebrow">REGISTRO COMERCIAL</span>
+            <h1 id="venta-form-titulo">Nueva venta</h1>
+            <p>Agregue productos y servicios con cantidades enteras positivas. El total provisional es orientativo: los importes definitivos se calculan en el servidor.</p>
+        </div>
+        <div class="heading-actions">
+            <a class="secondary" th:href="@{/ventas}">Volver al historial</a>
+        </div>
+    </div>
+
+    <div class="banner error" th:if="${error}" role="alert" th:text="${error}"></div>
+
+    <section class="panel" aria-labelledby="items-form-titulo">
+        <div class="panel-top">
+            <div>
+                <h2 id="items-form-titulo">Ítems de la venta</h2>
+                <span class="count-badge" th:text="${#lists.size(ventaForm.items)}">1</span>
+            </div>
+            <button class="secondary" type="button" id="agregar-item">
+                <svg class="icono"><use href="#i-plus"></use></svg>Agregar ítem
+            </button>
+        </div>
+        <div class="panel-body">
+            <form th:action="@{/ventas/nueva}" th:object="${ventaForm}" method="post" data-venta-form>
+                <input type="hidden" th:field="*{claveIdempotencia}">
+                <div th:if="${#fields.hasErrors('claveIdempotencia')}" class="banner error" role="alert"
+                     th:text="${#fields.errors('claveIdempotencia')[0]}"></div>
+
+                <div id="items-container">
+                    <div class="item-row" th:each="item, estado : *{items}">
+                        <label>
+                            <span>Tipo</span>
+                            <select class="item-tipo" th:field="*{items[__${estado.index}__].tipo}">
+                                <option value="PRODUCTO">Producto</option>
+                                <option value="SERVICIO">Servicio</option>
+                            </select>
+                        </label>
+                        <label>
+                            <span>Producto o servicio</span>
+                            <select class="item-referencia" th:field="*{items[__${estado.index}__].referenciaId}">
+                                <option value="">Seleccione…</option>
+                                <optgroup label="Productos">
+                                    <option th:each="producto : ${productos}"
+                                            th:value="${producto.id}"
+                                            th:attr="data-tipo='PRODUCTO',data-precio=${producto.precio}"
+                                            th:text="${producto.codigo} + ' · ' + ${producto.nombre} + ' — ' + ${#numbers.formatDecimal(producto.precio, 1, 2)}"></option>
+                                </optgroup>
+                                <optgroup label="Servicios">
+                                    <option th:each="servicio : ${servicios}"
+                                            th:value="${servicio.id}"
+                                            th:attr="data-tipo='SERVICIO',data-precio=${servicio.precio}"
+                                            th:text="${servicio.nombre} + ' — ' + ${#numbers.formatDecimal(servicio.precio, 1, 2)}"></option>
+                                </optgroup>
+                            </select>
+                            <small class="aviso-campo" th:if="${#fields.hasErrors('items[__${estado.index}__].referenciaId')}"
+                                   th:errors="*{items[__${estado.index}__].referenciaId}"></small>
+                        </label>
+                        <label>
+                            <span>Cantidad</span>
+                            <input class="item-cantidad" type="number" min="1" step="1"
+                                   th:field="*{items[__${estado.index}__].cantidad}">
+                            <small class="aviso-campo" th:if="${#fields.hasErrors('items[__${estado.index}__].cantidad')}"
+                                   th:errors="*{items[__${estado.index}__].cantidad}"></small>
+                        </label>
+                        <div class="item-subtotal">
+                            <span>Subtotal</span>
+                            <strong data-subtotal>$ 0.00</strong>
+                        </div>
+                        <button class="icon-button item-eliminar" type="button" aria-label="Quitar este ítem">×</button>
+                    </div>
+                </div>
+
+                <div class="venta-total">
+                    <span>Total provisional</span>
+                    <strong id="total-provisional" data-total-provisional>$ 0.00</strong>
+                </div>
+                <p class="nota">El servidor ignora cualquier importe enviado por el navegador: toma el precio vigente de productos y servicios, valida existencias y graba el detalle histórico.</p>
+
+                <div class="form-actions">
+                    <a class="secondary" th:href="@{/ventas}">Cancelar</a>
+                    <button class="primary" type="submit">Confirmar venta</button>
+                </div>
+            </form>
+        </div>
+        <div class="panel-foot">
+            <span>Los ítems repetidos se consolidan antes de validar stock.</span>
+            <span>La clave de idempotencia evita duplicados por doble clic o reintento.</span>
+        </div>
+    </section>
+
+    <div class="bottom-note">
+        <svg class="icono"><use href="#i-refresh"></use></svg>
+        <div>
+            <strong>Una sola transacción</strong>
+            <p>Confirmar descuenta existencias, registra la salida, guarda el detalle y deja el evento listo para Lewis.</p>
+        </div>
+    </div>
+</section>
+</html>

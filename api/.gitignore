@@ -1,0 +1,10 @@
+target/
+!.mvn/wrapper/maven-wrapper.jar
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar.no
+.env
+.env.*
+!.env.example
+*.log
+.idea/
+*.iml

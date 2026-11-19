@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: pagina('Movimientos', 'movimientos', ~{::contenido})}">
+<section th:fragment="contenido" aria-labelledby="movimientos-titulo">
+    <div class="page-heading">
+        <div>
+            <span class="eyebrow">TRAZABILIDAD</span>
+            <h1 id="movimientos-titulo">Movimientos</h1>
+            <p>Entradas, ajustes y salidas por venta. El historial es consultable: no se edita ni se borra.</p>
+        </div>
+        <div class="heading-actions">
+            <a class="secondary" th:href="@{/dashboard}"><svg class="icono"><use href="#i-grid"></use></svg>Dashboard</a>
+        </div>
+    </div>
+
+    <section class="panel" aria-labelledby="filtros-movimientos-titulo">
+        <div class="panel-top">
+            <div><h2 id="filtros-movimientos-titulo">Buscar y filtrar</h2></div>
+        </div>
+        <div class="panel-body">
+            <form class="tools" th:action="@{/movimientos}" method="get" aria-label="Filtros de movimientos">
+                <label>Producto
+                    <select name="productoId">
+                        <option value="">Todos</option>
+                        <option th:each="producto : ${productos}"
+                                th:value="${producto.id}"
+                                th:selected="${productoId != null and productoId == producto.id}"
+                                th:text="${producto.codigo} + ' · ' + ${producto.nombre}"></option>
+                    </select>
+                </label>
+                <label>Tipo
+                    <select name="tipo">
+                        <option value="" th:selected="${tipo == ''}">Todos</option>
+                        <option value="ENTRADA" th:selected="${tipo == 'ENTRADA'}">Entrada</option>
+                        <option value="AJUSTE" th:selected="${tipo == 'AJUSTE'}">Ajuste</option>
+                        <option value="SALIDA" th:selected="${tipo == 'SALIDA'}">Salida por venta</option>
+                    </select>
+                </label>
+                <label>Desde
+                    <input type="date" name="desde" th:value="${desde}">
+                </label>
+                <label>Hasta
+                    <input type="date" name="hasta" th:value="${hasta}">
+                </label>
+                <button class="secondary" type="submit">Aplicar filtros</button>
+            </form>
+        </div>
+    </section>
+
+    <section class="panel" aria-labelledby="listado-movimientos-titulo">
+        <div class="panel-top">
+            <div>
+                <h2 id="listado-movimientos-titulo">Historial general</h2>
+                <span class="count-badge" th:text="${totalElements}">0</span>
+            </div>
+        </div>
+        <div class="table-scroll" th:if="${!movimientos.isEmpty()}">
+            <table class="tabla">
+                <thead>
+                <tr>
+                    <th>Fecha</th><th>Producto</th><th>Tipo</th><th>Anterior</th>
+                    <th>Cambio</th><th>Resultante</th><th>Motivo</th><th>Usuario</th><th>Venta</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="movimiento : ${movimientos}">
+                    <td data-label="Fecha" th:text="${movimiento.fechaLocal}"></td>
+                    <td data-label="Producto">
+                        <strong th:text="${movimiento.codigoProducto}">COD</strong>
+                        <small th:text="${movimiento.nombreProducto}"></small>
+                    </td>
+                    <td data-label="Tipo">
+                        <span class="pill"
+                              th:classappend="${movimiento.tipo.name() == 'ENTRADA'} ? 'green' : (${movimiento.tipo.name() == 'SALIDA'} ? 'neutral' : 'amber')"
+                              th:text="${movimiento.tipo}">ENTRADA</span>
+                    </td>
+                    <td data-label="Anterior" th:text="${movimiento.cantidadAnterior}">0</td>
+                    <td data-label="Cambio"
+                        th:classappend="${movimiento.cambio >= 0} ? 'positivo' : 'negativo'"
+                        th:text="${movimiento.cambio >= 0} ? '+' + ${movimiento.cambio} : ${movimiento.cambio}">0</td>
+                    <td data-label="Resultante" th:text="${movimiento.cantidadResultante}">0</td>
+                    <td class="reason-cell" data-label="Motivo" th:text="${movimiento.motivo}"></td>
+                    <td data-label="Usuario" th:text="${movimiento.usuarioNombre} ?: 'Anterior al login'">—</td>
+                    <td data-label="Venta">
+                        <a class="text-button" th:if="${movimiento.ventaId != null}"
+                           th:href="@{/ventas/{id}(id=${movimiento.ventaId})}"
+                           th:text="'#' + ${movimiento.ventaId}">#0</a>
+                        <span th:unless="${movimiento.ventaId != null}">—</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="empty" th:if="${movimientos.isEmpty()}">
+            <span class="product-avatar"><svg class="icono"><use href="#i-history"></use></svg></span>
+            <h3>No hay movimientos con estos filtros</h3>
+            <p>Pruebe con otro producto, tipo o rango de fechas.</p>
+        </div>
+        <div class="panel-foot" th:if="${totalPages > 0}">
+            <span>Página <strong th:text="${page + 1}">1</strong> de <strong th:text="${totalPages}">1</strong> ·
+                <span th:text="${totalElements}">0</span> movimientos</span>
+            <span class="row-actions">
+                <a class="text-button" th:if="${page > 0}"
+                   th:href="@{/movimientos(productoId=${productoId},tipo=${tipo},desde=${desde},hasta=${hasta},page=${page - 1},size=${size})}">Anterior</a>
+                <a class="text-button" th:if="${page + 1 < totalPages}"
+                   th:href="@{/movimientos(productoId=${productoId},tipo=${tipo},desde=${desde},hasta=${hasta},page=${page + 1},size=${size})}">Siguiente</a>
+            </span>
+        </div>
+    </section>
+</section>
+</html>

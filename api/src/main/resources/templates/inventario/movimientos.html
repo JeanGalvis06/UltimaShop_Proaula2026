@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: pagina('Movimientos', 'inventario', ~{::contenido})}">
+<section th:fragment="contenido" aria-labelledby="movimientos-titulo">
+    <div class="page-heading">
+        <div>
+            <span class="eyebrow">TRAZABILIDAD</span>
+            <h1 id="movimientos-titulo">Movimientos de inventario</h1>
+            <p th:text="${producto.codigo} + ' — ' + ${producto.nombre}">Producto</p>
+        </div>
+        <div class="heading-actions">
+            <a class="secondary" th:href="@{/inventario}">
+                <svg class="icono"><use href="#i-history"></use></svg>Volver al inventario
+            </a>
+        </div>
+    </div>
+
+    <section class="panel" aria-labelledby="historial-titulo">
+        <div class="panel-top">
+            <div>
+                <h2 id="historial-titulo">Historial</h2>
+                <span class="count-badge" th:text="${#lists.size(movimientos)}">0</span>
+            </div>
+        </div>
+
+        <div class="table-scroll" th:if="${!movimientos.isEmpty()}">
+            <table class="tabla">
+                <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Tipo</th>
+                    <th>Anterior</th>
+                    <th>Cambio</th>
+                    <th>Resultante</th>
+                    <th>Motivo</th>
+                    <th>Usuario</th>
+                    <th>Venta</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="m : ${movimientos}">
+                    <td data-label="Fecha" th:text="${m.fechaLocal}"></td>
+                    <td data-label="Tipo">
+                        <span class="pill" th:classappend="${m.tipo.name() == 'ENTRADA'} ? 'green' : 'amber'"
+                              th:text="${m.tipo}">ENTRADA</span>
+                    </td>
+                    <td data-label="Anterior" th:text="${m.cantidadAnterior}">0</td>
+                    <td data-label="Cambio"
+                        th:classappend="${m.cambio >= 0} ? 'positivo' : 'negativo'"
+                        th:text="${m.cambio >= 0} ? '+' + ${m.cambio} : ${m.cambio}">0</td>
+                    <td data-label="Resultante" th:text="${m.cantidadResultante}">0</td>
+                    <td class="reason-cell" data-label="Motivo" th:text="${m.motivo}"></td>
+                    <td data-label="Usuario" th:text="${m.usuarioNombre} ?: 'Anterior al login'">—</td>
+                    <td data-label="Venta">
+                        <a class="text-button" th:if="${m.ventaId != null}"
+                           th:href="@{/ventas/{id}(id=${m.ventaId})}"
+                           th:text="'#' + ${m.ventaId}">#0</a>
+                        <span th:unless="${m.ventaId != null}">—</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="empty" th:if="${movimientos.isEmpty()}">
+            <span class="product-avatar"><svg class="icono"><use href="#i-history"></use></svg></span>
+            <h3>Todavía no hay movimientos</h3>
+            <p>Las entradas y los ajustes aparecerán aquí con su fecha, cantidad y motivo.</p>
+            <a class="primary" th:href="@{/inventario}">Ir al inventario</a>
+        </div>
+
+        <div class="panel-foot">
+            <span>El cambio positivo corresponde a una entrada; el negativo, a un ajuste.</span>
+            <span>El historial se ordena del movimiento más reciente al más antiguo.</span>
+        </div>
+    </section>
+</section>
+</html>

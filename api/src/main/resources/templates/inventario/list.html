@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: pagina('Inventario', 'inventario', ~{::contenido})}">
+<section th:fragment="contenido" aria-labelledby="inventario-titulo">
+    <div class="page-heading">
+        <div>
+            <span class="eyebrow">CONTROL DE INVENTARIO</span>
+            <h1 id="inventario-titulo">Inventario</h1>
+            <p>Cada producto en su lugar. Cada movimiento, registrado con su motivo y su fecha.</p>
+        </div>
+        <div class="heading-actions">
+            <a class="secondary" th:href="@{/}"><svg class="icono"><use href="#i-grid"></use></svg>Inicio</a>
+            <a class="primary" th:href="@{/inventario/productos/nuevo}">
+                <svg class="icono"><use href="#i-plus"></use></svg>Nuevo producto
+            </a>
+        </div>
+    </div>
+
+    <div class="banner exito" th:if="${mensaje}" role="status" th:text="${mensaje}"></div>
+    <div class="banner error" th:if="${error}" role="alert" th:text="${error}"></div>
+
+    <section class="stats" aria-label="Resumen del inventario">
+        <div class="stat">
+            <div><span>Valor del inventario</span><i><svg class="icono"><use href="#i-value"></use></svg></i></div>
+            <strong th:text="'$ ' + ${#numbers.formatDecimal(valorInventario, 1, 2)}">$ 0.00</strong>
+            <small>Costo de las unidades disponibles</small>
+        </div>
+        <div class="stat">
+            <div><span>Unidades disponibles</span><i><svg class="icono"><use href="#i-inventory"></use></svg></i></div>
+            <strong><span th:text="${unidadesTotales}">0</span> <em>uds.</em></strong>
+            <small th:text="${totalProductos} + ' referencias en catálogo'">0 referencias en catálogo</small>
+        </div>
+        <div class="stat">
+            <div><span>Stock por revisar</span><i class="amber"><svg class="icono"><use href="#i-alert"></use></svg></i></div>
+            <strong><span th:text="${stockPorRevisar}">0</span> <em>referencias</em></strong>
+            <small>En el mínimo o sin existencias</small>
+        </div>
+        <div class="stat">
+            <div><span>Productos activos</span><i><svg class="icono"><use href="#i-grid"></use></svg></i></div>
+            <strong th:text="${productosActivos}">0</strong>
+            <small th:text="'De ' + ${totalProductos} + ' productos registrados'">De 0 productos registrados</small>
+        </div>
+    </section>
+
+    <section class="panel" aria-labelledby="productos-titulo">
+        <div class="panel-top">
+            <div><h2 id="productos-titulo">Productos</h2><span class="count-badge" th:text="${#lists.size(productos)}">0</span></div>
+            <form class="tools" th:action="@{/inventario}" method="get" aria-label="Buscar y filtrar">
+                <span class="eyebrow">Buscar y filtrar</span>
+                <label>Código o nombre
+                    <input class="search" type="search" name="q" th:value="${q}" placeholder="Buscar código o nombre…">
+                </label>
+                <label>Estado
+                    <select name="activo">
+                        <option value="" th:selected="${activo == null}">Todos</option>
+                        <option value="true" th:selected="${activo == true}">Activos</option>
+                        <option value="false" th:selected="${activo == false}">Inactivos</option>
+                    </select>
+                </label>
+                <label class="casilla">
+                    <input type="checkbox" name="stockBajo" value="true" th:checked="${stockBajo}"> Solo stock bajo
+                </label>
+                <button class="secondary" type="submit">Aplicar filtros</button>
+            </form>
+        </div>
+
+        <div class="table-scroll" th:if="${!productos.isEmpty()}">
+            <table class="tabla">
+                <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Código</th>
+                    <th>Costo</th>
+                    <th>Precio</th>
+                    <th>Disponible</th>
+                    <th>Estado</th>
+                    <th>Movimientos</th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="p : ${productos}">
+                    <td class="celda-producto">
+                        <div class="product-cell">
+                            <span class="product-avatar" th:text="${#strings.toUpperCase(#strings.substring(p.nombre, 0, 1))}">P</span>
+                            <div>
+                                <strong th:text="${p.nombre}">Nombre</strong>
+                                <small th:if="${p.descripcion}" th:text="${p.descripcion}"></small>
+                            </div>
+                        </div>
+                    </td>
+                    <td data-label="Código"><span class="sku" th:text="${p.codigo}">COD</span></td>
+                    <td data-label="Costo" th:text="'$ ' + ${#numbers.formatDecimal(p.costo, 1, 2)}">$ 0.00</td>
+                    <td data-label="Precio" th:text="'$ ' + ${#numbers.formatDecimal(p.precio, 1, 2)}">$ 0.00</td>
+                    <td data-label="Disponible">
+                        <strong th:text="${p.stockActual}">0</strong>
+                        <small th:text="'Mínimo: ' + ${p.stockMinimo}">Mínimo: 0</small>
+                        <span class="pill red" th:if="${p.stockActual == 0}">Sin stock</span>
+                        <span class="pill amber" th:if="${p.stockActual > 0 and p.stockActual le p.stockMinimo}">Stock bajo</span>
+                        <span class="pill green" th:if="${p.stockActual > p.stockMinimo}">Disponible</span>
+                    </td>
+                    <td data-label="Estado">
+                        <span class="pill green" th:if="${p.activo}">Activo</span>
+                        <span class="pill red" th:unless="${p.activo}">Inactivo</span>
+                    </td>
+                    <td data-label="Movimientos">
+                        <div class="row-actions">
+                            <button type="button" class="text-button" th:disabled="${!p.activo}"
+                                    th:attr="data-dialog-open='dialogo-entrada-' + ${p.id}">Entrada</button>
+                            <button type="button" class="text-button" th:disabled="${!p.activo}"
+                                    th:attr="data-dialog-open='dialogo-ajuste-' + ${p.id}">Ajuste</button>
+                        </div>
+                    </td>
+                    <td class="celda-acciones" data-label="Acciones">
+                        <div class="row-actions">
+                            <a class="text-button" th:href="@{/inventario/productos/{id}/editar(id=${p.id})}">Editar</a>
+                            <a class="text-button" th:href="@{/inventario/productos/{id}/movimientos(id=${p.id})}">Historial</a>
+                            <button type="button" class="text-button" th:classappend="${p.activo} ? 'danger'"
+                                    th:text="${p.activo} ? 'Desactivar' : 'Activar'"
+                                    th:attr="data-confirmar-estado=@{/inventario/productos/{id}/activo(id=${p.id})},
+                                             data-activo=${p.activo} ? 'false' : 'true',
+                                             data-mensaje=${p.activo} ? '¿Desactivar ' + ${p.nombre} + '? Sus datos se conservan y no admitirá movimientos.' : '¿Activar ' + ${p.nombre} + '? Podrá volver a registrar entradas y ajustes.'">Desactivar</button>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="empty" th:if="${productos.isEmpty()}">
+            <span class="product-avatar"><svg class="icono"><use href="#i-inventory"></use></svg></span>
+            <h3 th:if="${q != null and !q.isEmpty()}">No hay coincidencias</h3>
+            <h3 th:unless="${q != null and !q.isEmpty()}">Dale un lugar a tus productos</h3>
+            <p th:if="${q != null and !q.isEmpty()}">Pruebe con otro código o nombre, o cambie los filtros.</p>
+            <p th:unless="${q != null and !q.isEmpty()}">Cree el primer producto. Comenzará con existencias en cero.</p>
+            <a class="primary" th:href="@{/inventario/productos/nuevo}">Nuevo producto</a>
+        </div>
+
+        <div class="panel-foot">
+            <span>Los productos nuevos inician con stock 0.</span>
+            <span>Las existencias cambian solo con entradas y ajustes.</span>
+        </div>
+    </section>
+
+    <th:block th:each="p : ${productos}">
+        <dialog class="dialog" th:id="'dialogo-entrada-' + ${p.id}"
+                th:attr="aria-labelledby='titulo-entrada-' + ${p.id}">
+            <form method="post" th:action="@{/inventario/productos/{id}/entradas(id=${p.id})}">
+                <header>
+                    <div>
+                        <span class="eyebrow">MOVIMIENTO</span>
+                        <h2 th:id="'titulo-entrada-' + ${p.id}" th:text="'Entrada · ' + ${p.codigo}">Entrada</h2>
+                    </div>
+                    <button type="button" class="icon-button" data-dialog-close aria-label="Cerrar ventana">×</button>
+                </header>
+                <p class="help">La cantidad debe ser mayor que cero. El movimiento queda guardado con su motivo.</p>
+                <div class="fields">
+                    <label><span>Cantidad *</span><input type="number" name="cantidad" min="1" step="1" required></label>
+                    <label class="wide"><span>Motivo *</span><input type="text" name="motivo" maxlength="300" required placeholder="Ej. Compra recibida"></label>
+                </div>
+                <footer>
+                    <button type="button" class="secondary" data-dialog-close>Cancelar</button>
+                    <button type="submit" class="primary">Registrar entrada</button>
+                </footer>
+            </form>
+        </dialog>
+
+        <dialog class="dialog" th:id="'dialogo-ajuste-' + ${p.id}"
+                th:attr="aria-labelledby='titulo-ajuste-' + ${p.id}">
+            <form method="post" th:action="@{/inventario/productos/{id}/ajustes(id=${p.id})}">
+                <header>
+                    <div>
+                        <span class="eyebrow">MOVIMIENTO</span>
+                        <h2 th:id="'titulo-ajuste-' + ${p.id}" th:text="'Ajuste · ' + ${p.codigo}">Ajuste</h2>
+                    </div>
+                    <button type="button" class="icon-button" data-dialog-close aria-label="Cerrar ventana">×</button>
+                </header>
+                <p class="help">
+                    Indique la cantidad final, no el cambio. Stock actual:
+                    <strong th:text="${p.stockActual}">0</strong>. El motivo es obligatorio.
+                </p>
+                <div class="fields">
+                    <label><span>Cantidad final *</span><input type="number" name="cantidadFinal" min="0" step="1" required></label>
+                    <label class="wide"><span>Motivo *</span><input type="text" name="motivo" maxlength="300" required placeholder="Ej. Merma por vencimiento"></label>
+                </div>
+                <footer>
+                    <button type="button" class="secondary" data-dialog-close>Cancelar</button>
+                    <button type="submit" class="primary">Registrar ajuste</button>
+                </footer>
+            </form>
+        </dialog>
+    </th:block>
+
+    <dialog class="dialog" id="dialogo-estado" aria-labelledby="titulo-estado">
+        <form method="post">
+            <header>
+                <div>
+                    <span class="eyebrow">CONFIRMACIÓN</span>
+                    <h2 id="titulo-estado">Cambiar estado del producto</h2>
+                </div>
+                <button type="button" class="icon-button" data-dialog-close aria-label="Cerrar ventana">×</button>
+            </header>
+            <p class="help" data-confirmar-mensaje>Confirme el cambio de estado.</p>
+            <input type="hidden" name="activo" value="false">
+            <footer>
+                <button type="button" class="secondary" data-dialog-close>Volver</button>
+                <button type="submit" class="primary">Confirmar cambio</button>
+            </footer>
+        </form>
+    </dialog>
+
+    <div class="bottom-note">
+        <svg class="icono"><use href="#i-history"></use></svg>
+        <div>
+            <strong>Un inventario con trazabilidad</strong>
+            <p>Consulte el historial de cada producto para ver entradas, ajustes, cantidades y motivos.</p>
+        </div>
+    </div>
+</section>
+</html>

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: pagina('Módulos', 'inicio', ~{::contenido})}">
+<section th:fragment="contenido" aria-labelledby="inicio-titulo">
+    <div class="page-heading">
+        <div>
+            <span class="eyebrow">PANEL GENERAL</span>
+            <h1 id="inicio-titulo">Módulos de Ultima Shop</h1>
+            <p>Gestor de inventario, ventas y servicios para emprendedores. Los cinco módulos están disponibles en esta aplicación.</p>
+        </div>
+        <div class="heading-actions">
+            <a class="secondary" th:href="@{/dashboard}"><svg class="icono"><use href="#i-grid"></use></svg>Ir al dashboard</a>
+        </div>
+    </div>
+
+    <section class="panel" aria-labelledby="modulos-titulo">
+        <div class="panel-top">
+            <div><h2 id="modulos-titulo">Módulos</h2><span class="count-badge">5</span></div>
+        </div>
+        <div class="module-grid panel-body">
+            <article class="module-card" th:each="modulo : ${modulos}">
+                <div>
+                    <h3 th:text="${modulo.nombre}">Módulo</h3>
+                    <span class="pill green" th:text="${modulo.estado}">Disponible</span>
+                </div>
+                <p th:text="'Consulte y mantenga la información de ' + ${modulo.nombre} + '.'">Módulo disponible.</p>
+                <a class="text-button" th:href="${modulo.url}">
+                    Abrir módulo <svg class="icono"><use href="#i-arrow"></use></svg>
+                </a>
+            </article>
+        </div>
+        <div class="panel-foot">
+            <span>Una sola aplicación Java con interfaz Thymeleaf.</span>
+            <span>Información operativa: <a href="/actuator/health">/actuator/health</a></span>
+        </div>
+    </section>
+
+    <div class="bottom-note">
+        <svg class="icono"><use href="#i-inventory"></use></svg>
+        <div>
+            <strong>Un inventario con trazabilidad</strong>
+            <p>Cada entrada, ajuste y venta queda registrado con su fecha, cantidad y motivo.</p>
+        </div>
+    </div>
+</section>
+</html>

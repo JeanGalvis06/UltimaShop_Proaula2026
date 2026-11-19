@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: pagina('Servicios', 'servicios', ~{::contenido})}">
+<section th:fragment="contenido" aria-labelledby="servicios-titulo">
+    <div class="page-heading">
+        <div>
+            <span class="eyebrow">CATÁLOGO DE SERVICIOS</span>
+            <h1 id="servicios-titulo">Servicios</h1>
+            <p>Precios fijos administrados en servidor. Su prestación se registra como ítem de una venta y no consume inventario.</p>
+        </div>
+        <div class="heading-actions">
+            <a class="primary" th:href="@{/servicios/nuevo}">
+                <svg class="icono"><use href="#i-plus"></use></svg>Nuevo servicio
+            </a>
+        </div>
+    </div>
+
+    <div class="banner exito" th:if="${mensaje}" role="status" th:text="${mensaje}"></div>
+    <div class="banner error" th:if="${error}" role="alert" th:text="${error}"></div>
+
+    <section class="panel" aria-labelledby="listado-servicios-titulo">
+        <div class="panel-top">
+            <div>
+                <h2 id="listado-servicios-titulo">Servicios registrados</h2>
+                <span class="count-badge" th:text="${#lists.size(servicios)}">0</span>
+            </div>
+            <form class="tools" th:action="@{/servicios}" method="get" aria-label="Buscar servicios">
+                <label>Nombre
+                    <input class="search" type="search" name="q" th:value="${q}" placeholder="Buscar servicio…">
+                </label>
+                <label>Estado
+                    <select name="activo">
+                        <option value="" th:selected="${activo == null}">Todos</option>
+                        <option value="true" th:selected="${activo == true}">Activos</option>
+                        <option value="false" th:selected="${activo == false}">Inactivos</option>
+                    </select>
+                </label>
+                <button class="secondary" type="submit">Aplicar filtros</button>
+            </form>
+        </div>
+
+        <div class="table-scroll" th:if="${!servicios.isEmpty()}">
+            <table class="tabla">
+                <thead>
+                <tr><th>Servicio</th><th>Descripción</th><th>Precio</th><th>Estado</th><th>Acciones</th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="servicio : ${servicios}">
+                    <td class="celda-producto">
+                        <div class="product-cell">
+                            <span class="product-avatar"><svg class="icono"><use href="#i-service"></use></svg></span>
+                            <div>
+                                <strong th:text="${servicio.nombre}">Nombre</strong>
+                                <small th:text="${servicio.codigo}">SERV-000000</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="reason-cell" data-label="Descripción" th:text="${servicio.descripcion} ?: 'Sin descripción'"></td>
+                    <td data-label="Precio" th:text="'$ ' + ${#numbers.formatDecimal(servicio.precio, 1, 2)}">$ 0.00</td>
+                    <td data-label="Estado">
+                        <span class="pill green" th:if="${servicio.activo}">Activo</span>
+                        <span class="pill red" th:unless="${servicio.activo}">Inactivo</span>
+                    </td>
+                    <td class="celda-acciones" data-label="Acciones">
+                        <div class="row-actions">
+                            <a class="text-button" th:href="@{/servicios/{id}/editar(id=${servicio.id})}">Editar</a>
+                            <button type="button" class="text-button"
+                                    th:classappend="${servicio.activo} ? 'danger'"
+                                    th:text="${servicio.activo} ? 'Desactivar' : 'Activar'"
+                                    th:attr="data-confirmar-estado=@{/servicios/{id}/activo(id=${servicio.id})},
+                                             data-activo=${servicio.activo} ? 'false' : 'true',
+                                             data-mensaje=${servicio.activo} ? '¿Desactivar ' + ${servicio.nombre} + '? No podrá venderse hasta activarlo de nuevo.' : '¿Activar ' + ${servicio.nombre} + '?'"></button>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="empty" th:if="${servicios.isEmpty()}">
+            <span class="product-avatar"><svg class="icono"><use href="#i-service"></use></svg></span>
+            <h3>Todavía no hay servicios</h3>
+            <p>Cree el primer servicio con nombre y precio fijo. Podrá desactivarlo sin borrar sus datos.</p>
+            <a class="primary" th:href="@{/servicios/nuevo}">Nuevo servicio</a>
+        </div>
+        <div class="panel-foot">
+            <span>El precio se recalcula en el servidor al confirmar cada venta.</span>
+            <span>Los servicios no generan movimientos de inventario.</span>
+        </div>
+    </section>
+
+    <dialog class="dialog" id="dialogo-estado" aria-labelledby="titulo-estado-servicio">
+        <form method="post">
+            <header>
+                <div>
+                    <span class="eyebrow">CONFIRMACIÓN</span>
+                    <h2 id="titulo-estado-servicio">Cambiar estado del servicio</h2>
+                </div>
+                <button type="button" class="icon-button" data-dialog-close aria-label="Cerrar ventana">×</button>
+            </header>
+            <p class="help" data-confirmar-mensaje>Confirme el cambio de estado.</p>
+            <input type="hidden" name="activo" value="false">
+            <footer>
+                <button type="button" class="secondary" data-dialog-close>Volver</button>
+                <button type="submit" class="primary">Confirmar cambio</button>
+            </footer>
+        </form>
+    </dialog>
+</section>
+</html>

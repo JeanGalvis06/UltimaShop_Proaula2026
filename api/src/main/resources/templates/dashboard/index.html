@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: pagina('Dashboard', 'dashboard', ~{::contenido})}">
+<section th:fragment="contenido" aria-labelledby="dashboard-titulo">
+    <div class="page-heading">
+        <div>
+            <span class="eyebrow">PANEL GENERAL</span>
+            <h1 id="dashboard-titulo">Dashboard</h1>
+            <p>Datos operativos de hoy, existencias por revisar y actividad reciente. Zona horaria:
+                <strong th:text="${resumen.zonaHoraria}">America/Bogota</strong>.</p>
+        </div>
+        <div class="heading-actions">
+            <a class="primary" th:href="@{/ventas/nueva}">
+                <svg class="icono"><use href="#i-plus"></use></svg>Nueva venta
+            </a>
+        </div>
+    </div>
+
+    <section class="stats" aria-label="Resumen del día">
+        <div class="stat">
+            <div><span>Ventas de hoy</span><i><svg class="icono"><use href="#i-cart"></use></svg></i></div>
+            <strong th:text="${resumen.ventasHoy}">0</strong>
+            <small>Ventas confirmadas en el día</small>
+        </div>
+        <div class="stat">
+            <div><span>Ingresos de hoy</span><i><svg class="icono"><use href="#i-value"></use></svg></i></div>
+            <strong th:text="'$ ' + ${#numbers.formatDecimal(resumen.ingresosHoy, 1, 2)}">$ 0.00</strong>
+            <small>Productos y servicios</small>
+        </div>
+        <div class="stat">
+            <div><span>Ingresos productos</span><i><svg class="icono"><use href="#i-inventory"></use></svg></i></div>
+            <strong th:text="'$ ' + ${#numbers.formatDecimal(resumen.ingresosProductos, 1, 2)}">$ 0.00</strong>
+            <small>Solo venta de inventario</small>
+        </div>
+        <div class="stat">
+            <div><span>Ingresos servicios</span><i><svg class="icono"><use href="#i-service"></use></svg></i></div>
+            <strong th:text="'$ ' + ${#numbers.formatDecimal(resumen.ingresosServicios, 1, 2)}">$ 0.00</strong>
+            <small>Prestaciones registradas</small>
+        </div>
+    </section>
+
+    <section class="panel" aria-labelledby="ventas-hoy-titulo">
+        <div class="panel-top">
+            <div>
+                <h2 id="ventas-hoy-titulo">Ventas recientes de hoy</h2>
+                <span class="count-badge" th:text="${#lists.size(resumen.ventasRecientes)}">0</span>
+            </div>
+            <a class="text-button" th:href="@{/ventas}">Ver historial completo <svg class="icono"><use href="#i-arrow"></use></svg></a>
+        </div>
+        <div class="table-scroll" th:if="${!resumen.ventasRecientes.isEmpty()}">
+            <table class="tabla">
+                <thead>
+                <tr><th>Venta</th><th>Fecha</th><th>Productos</th><th>Servicios</th><th>Total</th><th>Detalle</th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="venta : ${resumen.ventasRecientes}">
+                    <td data-label="Venta"><span class="sku" th:text="'#' + ${venta.id}">#0</span></td>
+                    <td data-label="Fecha" th:text="${venta.fecha}"></td>
+                    <td data-label="Productos" th:text="'$ ' + ${#numbers.formatDecimal(venta.totalProductos, 1, 2)}">$ 0.00</td>
+                    <td data-label="Servicios" th:text="'$ ' + ${#numbers.formatDecimal(venta.totalServicios, 1, 2)}">$ 0.00</td>
+                    <td data-label="Total"><strong th:text="'$ ' + ${#numbers.formatDecimal(venta.total, 1, 2)}">$ 0.00</strong></td>
+                    <td class="celda-acciones" data-label="Detalle">
+                        <a class="text-button" th:href="@{/ventas/{id}(id=${venta.id})}">Abrir</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="empty" th:if="${resumen.ventasRecientes.isEmpty()}">
+            <span class="product-avatar"><svg class="icono"><use href="#i-cart"></use></svg></span>
+            <h3>No hay ventas registradas hoy</h3>
+            <p>Las ventas confirmadas aparecerán aquí con sus importes calculados por el servidor.</p>
+        </div>
+    </section>
+
+    <div class="panel-grid">
+        <section class="panel" aria-labelledby="stock-bajo-titulo">
+            <div class="panel-top">
+                <div>
+                    <h2 id="stock-bajo-titulo">Stock bajo</h2>
+                    <span class="count-badge" th:text="${#lists.size(resumen.productosStockBajo)}">0</span>
+                </div>
+                <a class="text-button" th:href="@{/inventario(stockBajo=true)}">Ver inventario</a>
+            </div>
+            <div class="table-scroll" th:if="${!resumen.productosStockBajo.isEmpty()}">
+                <table class="tabla">
+                    <thead><tr><th>Producto</th><th>Disponible</th><th>Mínimo</th></tr></thead>
+                    <tbody>
+                    <tr th:each="producto : ${resumen.productosStockBajo}">
+                        <td data-label="Producto">
+                            <strong th:text="${producto.nombre}">Producto</strong>
+                            <small th:text="${producto.codigo}">COD</small>
+                        </td>
+                        <td data-label="Disponible" th:text="${producto.stockActual}">0</td>
+                        <td data-label="Mínimo" th:text="${producto.stockMinimo}">0</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="empty" th:if="${resumen.productosStockBajo.isEmpty()}">
+                <h3>Sin alertas de stock</h3>
+                <p>Ningún producto activo está en su mínimo o por debajo.</p>
+            </div>
+        </section>
+
+        <section class="panel" aria-labelledby="movimientos-recientes-titulo">
+            <div class="panel-top">
+                <div>
+                    <h2 id="movimientos-recientes-titulo">Últimos movimientos</h2>
+                    <span class="count-badge" th:text="${#lists.size(resumen.ultimosMovimientos)}">0</span>
+                </div>
+                <a class="text-button" th:href="@{/movimientos}">Ver todos</a>
+            </div>
+            <div class="table-scroll" th:if="${!resumen.ultimosMovimientos.isEmpty()}">
+                <table class="tabla">
+                    <thead><tr><th>Fecha</th><th>Producto</th><th>Tipo</th><th>Cambio</th></tr></thead>
+                    <tbody>
+                    <tr th:each="movimiento : ${resumen.ultimosMovimientos}">
+                        <td data-label="Fecha" th:text="${movimiento.fechaLocal}"></td>
+                        <td data-label="Producto" th:text="${movimiento.codigoProducto}">COD</td>
+                        <td data-label="Tipo">
+                            <span class="pill" th:classappend="${movimiento.tipo.name() == 'ENTRADA'} ? 'green' : (${movimiento.tipo.name() == 'SALIDA'} ? 'neutral' : 'amber')"
+                                  th:text="${movimiento.tipo}">ENTRADA</span>
+                        </td>
+                        <td data-label="Cambio"
+                            th:classappend="${movimiento.cambio >= 0} ? 'positivo' : 'negativo'"
+                            th:text="${movimiento.cambio >= 0} ? '+' + ${movimiento.cambio} : ${movimiento.cambio}">0</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="empty" th:if="${resumen.ultimosMovimientos.isEmpty()}">
+                <h3>Todavía no hay movimientos</h3>
+                <p>Entradas, ajustes y salidas por venta aparecerán aquí.</p>
+            </div>
+        </section>
+    </div>
+
+    <div class="bottom-note">
+        <svg class="icono"><use href="#i-refresh"></use></svg>
+        <div>
+            <strong>Resumen provisional sobre tablas operativas</strong>
+            <p>Este panel consulta ventas, productos y movimientos directamente. No simula eventos procesados ni comprobantes del worker. El proveedor es reemplazable cuando Lewis entregue el resumen asíncrono.</p>
+        </div>
+    </div>
+</section>
+</html>

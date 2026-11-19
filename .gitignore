@@ -1,0 +1,20 @@
+# Secrets and local configuration
+**/.env
+**/.env.*
+!**/.env.example
+**/*.log
+**/*.log.err
+**/*.pid
+**/*.dump
+**/backups/
+# Build outputs and editor files
+**/target/
+**/node_modules/
+.idea/
+**/*.iml
+.vscode/
+# Visual reference: not part of this Java project
+/ultima-store/
+# Local evidence may contain account data
+/artifacts/
+**/screenshots/

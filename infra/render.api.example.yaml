@@ -1,0 +1,35 @@
+# Template only. Review plans, database credentials and public exposure before applying.
+# GitHub build route: Render builds the tested Dockerfile; image-based deployment is another option.
+services:
+  - type: web
+    name: ultima-shop-api
+    runtime: docker
+    repo: https://github.com/JeanGalvis06/UltimaShop_Proaula2026
+    branch: main
+    dockerfilePath: ./infra/Dockerfile.api
+    dockerContext: .
+    autoDeployTrigger: off
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: PORT
+        value: '10000'
+      - key: SERVER_PORT
+        value: '10000'
+      - key: DB_URL
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: APP_ADMIN_USERNAME
+        sync: false
+      - key: APP_ADMIN_PASSWORD
+        sync: false
+      - key: APP_ADMIN_NAME
+        value: Administrador Ultima Shop
+      - key: APP_BASE_URL
+        sync: false
+      - key: COOKIE_SECURE
+        value: 'true'
+      - key: MAIL_ENABLED
+        value: 'false'

@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: pagina('Usuarios', 'usuarios', ~{::contenido})}">
+<section th:fragment="contenido" aria-labelledby="usuarios-titulo">
+    <div class="page-heading">
+        <div>
+            <span class="eyebrow">ADMINISTRACIÓN</span>
+            <h1 id="usuarios-titulo">Usuarios</h1>
+            <p>Invite usuarios por correo y asigne roles. Los operadores pueden registrar ventas y consultar información; los administradores también gestionan catálogo y usuarios.</p>
+        </div>
+        <div class="heading-actions">
+            <a class="primary" th:href="@{/usuarios/nuevo}"><svg class="icono"><use href="#i-plus"></use></svg>Invitar usuario</a>
+        </div>
+    </div>
+
+    <div class="banner exito" th:if="${mensaje}" role="status" th:text="${mensaje}"></div>
+    <div class="banner error" th:if="${error}" role="alert" th:text="${error}"></div>
+
+    <section class="panel" aria-labelledby="listado-usuarios-titulo">
+        <div class="panel-top">
+            <div><h2 id="listado-usuarios-titulo">Cuentas registradas</h2><span class="count-badge" th:text="${#lists.size(usuarios)}">0</span></div>
+        </div>
+        <div class="table-scroll" th:if="${!usuarios.isEmpty()}">
+            <table class="tabla">
+                <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Usuario</th>
+                    <th>Correo</th>
+                    <th>Rol</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="u : ${usuarios}">
+                    <td class="celda-producto" data-label="Nombre"><strong th:text="${u.nombre}">Nombre</strong></td>
+                    <td data-label="Usuario"><span class="sku" th:text="${u.username}">usuario</span></td>
+                    <td data-label="Correo" th:text="${u.email} ?: '—'">—</td>
+                    <td data-label="Rol">
+                        <span class="pill neutral" th:text="${u.rol == 'ROLE_ADMIN'} ? 'Administrador' : 'Operador'">Rol</span>
+                    </td>
+                    <td data-label="Estado">
+                        <span class="pill green" th:if="${u.activo and u.correoVerificado}">Activo</span>
+                        <span class="pill amber" th:if="${!u.correoVerificado}">Invitación pendiente</span>
+                        <span class="pill red" th:if="${u.correoVerificado and !u.activo}">Inactivo</span>
+                    </td>
+                    <td class="celda-acciones" data-label="Acciones">
+                        <div class="row-actions">
+                            <form th:if="${!u.correoVerificado}" th:action="@{/usuarios/{id}/reenviar(id=${u.id})}" method="post">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <button class="text-button" type="submit">Reenviar invitación</button>
+                            </form>
+                            <form th:if="${u.correoVerificado and u.activo}" th:action="@{/usuarios/{id}/estado(id=${u.id})}" method="post">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <input type="hidden" name="activo" value="false">
+                                <button class="text-button danger" type="submit">Desactivar</button>
+                            </form>
+                            <form th:if="${u.correoVerificado and !u.activo}" th:action="@{/usuarios/{id}/estado(id=${u.id})}" method="post">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <input type="hidden" name="activo" value="true">
+                                <button class="text-button" type="submit">Activar</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="empty" th:if="${usuarios.isEmpty()}">
+            <h3>No hay usuarios registrados</h3>
+            <p>Cree una invitación para agregar operadores o administradores.</p>
+        </div>
+    </section>
+</section>
+</html>

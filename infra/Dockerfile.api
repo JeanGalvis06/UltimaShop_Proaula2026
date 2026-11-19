@@ -1,0 +1,21 @@
+FROM eclipse-temurin:21-jdk-jammy AS build
+WORKDIR /build
+COPY api/.mvn/ .mvn/
+COPY api/mvnw api/pom.xml ./
+RUN sed -i 's/\r$//' mvnw && sh ./mvnw -B -ntp dependency:go-offline
+COPY api/src/ src/
+# Integration tests need Docker and run on the host/CI before this image build.
+RUN sh ./mvnw -B -ntp -DskipTests package && \
+    find target -maxdepth 1 -name '*.jar' ! -name '*.original' -exec cp {} /build/app.jar \;
+
+FROM eclipse-temurin:21-jre-jammy AS runtime
+RUN apt-get update && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
+COPY --from=build --chown=10001:10001 /build/app.jar /app/app.jar
+USER 10001:10001
+ENV SERVER_PORT=8080
+EXPOSE 8080
+HEALTHCHECK --interval=15s --timeout=5s --start-period=60s --retries=5 \
+    CMD curl --fail --silent "http://127.0.0.1:${SERVER_PORT}/actuator/health" > /dev/null || exit 1
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]

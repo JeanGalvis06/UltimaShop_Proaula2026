@@ -1,0 +1,72 @@
+/* Tokens visuales adaptados de ultima-store/src/styles/tokens.css.
+   Recursos locales: sin fuentes ni imágenes remotas. Tema inicial: Morado (oscuro). */
+
+:root {
+  color-scheme: light;
+  --color-background-primary: #ffffff;
+  --color-background-secondary: #f6f5fb;
+  --color-background-tertiary: #efeef7;
+  --color-text-primary: #191925;
+  --color-text-secondary: #5b5b6e;
+  --color-text-tertiary: #9b9bae;
+  --color-border-secondary: #e6e4f0;
+  --color-border-tertiary: #f1effa;
+  --color-card-shadow: rgba(49, 46, 129, 0.06);
+  --color-bg-grad: linear-gradient(160deg, #faf9ff 0%, #f6f5fb 45%, #efeeff 100%);
+  --color-accent: #7c3aed;
+  --color-accent-soft: #a78bfa;
+  --color-accent-hover: #6d28d9;
+  --color-accent-grad: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+  --color-accent-glow: rgba(124, 58, 237, 0.14);
+  --color-gold: #d6a64b;
+  --color-success: #10b981;
+  --color-error: #ef4444;
+  --color-warning: #f59e0b;
+  --color-info: #3b82f6;
+  --color-sidebar-bg: #ffffff;
+  --color-sidebar-text: #191925;
+  --color-sidebar-text-muted: #5b5b6e;
+  --color-sidebar-hover: rgba(25, 25, 37, 0.05);
+  --color-sidebar-border: rgba(25, 25, 37, 0.08);
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+  --border-radius-xl: 16px;
+  --font-sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --color-background-primary: #191926;
+  --color-background-secondary: #12121c;
+  --color-background-tertiary: #232338;
+  --color-text-primary: #e2e6f0;
+  --color-text-secondary: #a1a5c0;
+  --color-text-tertiary: #656a86;
+  --color-border-secondary: #2d2d45;
+  --color-border-tertiary: #222237;
+  --color-card-shadow: rgba(0, 0, 0, 0.25);
+  --color-bg-grad: linear-gradient(160deg, #17172a 0%, #12121c 45%, #18162c 100%);
+  --color-accent-glow: rgba(139, 92, 246, 0.18);
+  --color-sidebar-bg: linear-gradient(180deg, #16162a 0%, #1a1a3c 60%, #201448 100%);
+  --color-sidebar-text: #ffffff;
+  --color-sidebar-text-muted: rgba(255, 255, 255, 0.6);
+  --color-sidebar-hover: rgba(255, 255, 255, 0.08);
+  --color-sidebar-border: rgba(255, 255, 255, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  background:
+    radial-gradient(1100px 480px at 88% -12%, var(--color-accent-glow), transparent 62%),
+    radial-gradient(900px 420px at -6% 108%, var(--color-accent-glow), transparent 60%),
+    var(--color-bg-grad);
+  background-attachment: fixed;
+  color: var(--color-text-primary);
+  min-height: 100vh;
+}

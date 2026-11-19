@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Iniciar sesión — Ultima Shop</title>
+    <link rel="stylesheet" th:href="@{/css/tokens.css}">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body class="pagina-login">
+<svg class="iconos" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+    <symbol id="i-inventory" viewBox="0 0 24 24">
+        <path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="M3 8v9l9 5 9-5V8M12 13v9M7.5 5.5l9 5"/>
+    </symbol>
+</svg>
+<main class="login-contenedor">
+    <div class="login-marca">
+        <span class="brand-mark"><svg class="icono"><use href="#i-inventory"></use></svg></span>
+        <div>
+            <strong>ULTIMA SHOP</strong>
+            <small>Gestor de inventario, ventas y servicios</small>
+        </div>
+    </div>
+
+    <section class="panel login-panel" aria-labelledby="login-titulo">
+        <div class="panel-body">
+            <span class="eyebrow">ACCESO SEGURO</span>
+            <h1 id="login-titulo">Iniciar sesión</h1>
+            <p class="help">Ingrese con su usuario o correo y contraseña. La sesión se protege con CSRF.</p>
+
+            <div class="banner error" th:if="${fallo}" role="alert">
+                Usuario o contraseña incorrectos. Verifique e intente de nuevo.
+            </div>
+            <div class="banner exito" th:if="${sesionCerrada}" role="status">
+                La sesión se cerró correctamente.
+            </div>
+            <div class="banner exito" th:if="${recuperacionSolicitada}" role="status"
+                 th:text="${mensajeRecuperacion}">Si el correo está registrado, recibirá instrucciones.</div>
+            <div class="banner exito" th:if="${passwordActualizada}" role="status">La contraseña se actualizó correctamente. Ya puede iniciar sesión.</div>
+            <div class="banner exito" th:if="${invitacionCompletada}" role="status">Su cuenta fue activada. Ya puede iniciar sesión.</div>
+
+            <form th:action="@{/login}" method="post" class="login-formulario">
+                <div class="fields">
+                    <label class="wide">
+                        <span>Usuario o correo</span>
+                        <input type="text" name="username" autocomplete="username" required autofocus>
+                    </label>
+                    <label class="wide">
+                        <span>Contraseña</span>
+                        <input type="password" name="password" autocomplete="current-password" required>
+                    </label>
+                </div>
+                <div class="form-actions" style="justify-content:space-between;align-items:center;flex-wrap:wrap;">
+                    <a class="text-button" th:href="@{/recuperar}">Olvidé mi contraseña</a>
+                    <button class="primary" type="submit">Entrar</button>
+                </div>
+            </form>
+        </div>
+        <div class="panel-foot">
+            <span>Acceso solo para usuarios autorizados.</span>
+            <span>Las contraseñas no se envían por correo.</span>
+        </div>
+    </section>
+</main>
+<script th:src="@{/js/app.js}" defer></script>
+</body>
+</html>

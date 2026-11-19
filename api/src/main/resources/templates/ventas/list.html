@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: pagina('Ventas', 'ventas', ~{::contenido})}">
+<section th:fragment="contenido" aria-labelledby="ventas-titulo">
+    <div class="page-heading">
+        <div>
+            <span class="eyebrow">HISTORIAL COMERCIAL</span>
+            <h1 id="ventas-titulo">Ventas</h1>
+            <p>Ventas confirmadas con detalle histórico. Una vez registradas no se editan ni se anulan en esta versión.</p>
+        </div>
+        <div class="heading-actions">
+            <a class="primary" th:href="@{/ventas/nueva}">
+                <svg class="icono"><use href="#i-plus"></use></svg>Nueva venta
+            </a>
+        </div>
+    </div>
+
+    <div class="banner exito" th:if="${mensaje}" role="status" th:text="${mensaje}"></div>
+    <div class="banner error" th:if="${error}" role="alert" th:text="${error}"></div>
+
+    <section class="panel" aria-labelledby="listado-ventas-titulo">
+        <div class="panel-top">
+            <div>
+                <h2 id="listado-ventas-titulo">Historial</h2>
+                <span class="count-badge" th:text="${#lists.size(ventas)}">0</span>
+            </div>
+        </div>
+        <div class="table-scroll" th:if="${!ventas.isEmpty()}">
+            <table class="tabla">
+                <thead>
+                <tr><th>Venta</th><th>Fecha</th><th>Productos</th><th>Servicios</th><th>Total</th><th>Usuario</th><th>Detalle</th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="venta : ${ventas}">
+                    <td data-label="Venta"><span class="sku" th:text="'#' + ${venta.id}">#0</span></td>
+                    <td data-label="Fecha" th:text="${venta.fecha}"></td>
+                    <td data-label="Productos" th:text="'$ ' + ${#numbers.formatDecimal(venta.totalProductos, 1, 2)}">$ 0.00</td>
+                    <td data-label="Servicios" th:text="'$ ' + ${#numbers.formatDecimal(venta.totalServicios, 1, 2)}">$ 0.00</td>
+                    <td data-label="Total"><strong th:text="'$ ' + ${#numbers.formatDecimal(venta.total, 1, 2)}">$ 0.00</strong></td>
+                    <td data-label="Usuario" th:text="${venta.usuarioNombre} ?: 'Anterior al login'">—</td>
+                    <td class="celda-acciones" data-label="Detalle">
+                        <a class="text-button" th:href="@{/ventas/{id}(id=${venta.id})}">Abrir</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="empty" th:if="${ventas.isEmpty()}">
+            <span class="product-avatar"><svg class="icono"><use href="#i-cart"></use></svg></span>
+            <h3>Todavía no hay ventas</h3>
+            <p>Registre una venta mixta para descontar stock, generar movimientos y guardar el evento outbox.</p>
+            <a class="primary" th:href="@{/ventas/nueva}">Nueva venta</a>
+        </div>
+        <div class="panel-foot">
+            <span>Las fechas se muestran en America/Bogota.</span>
+            <span>El evento VentaRegistrada v1 queda en outbox sin publicar.</span>
+        </div>
+    </section>
+</section>
+</html>

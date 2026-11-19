@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: pagina(${modo == 'crear'} ? 'Nuevo producto' : 'Editar producto', 'inventario', ~{::contenido})}">
+<section th:fragment="contenido" aria-labelledby="producto-titulo">
+    <div class="page-heading">
+        <div>
+            <span class="eyebrow">CATÁLOGO</span>
+            <h1 id="producto-titulo" th:text="${modo == 'crear'} ? 'Nuevo producto' : 'Editar producto'">
+                Producto
+            </h1>
+            <p>
+                El precio y el costo se guardan tal como se escriben. Las existencias no se editan aquí:
+                se registran con una entrada o un ajuste.
+            </p>
+        </div>
+        <div class="heading-actions">
+            <a class="secondary" th:href="@{/inventario}">
+                <svg class="icono"><use href="#i-history"></use></svg>Volver al inventario
+            </a>
+        </div>
+    </div>
+
+    <div class="banner error" th:if="${error}" role="alert" th:text="${error}"></div>
+
+    <section class="panel" aria-labelledby="datos-titulo">
+        <div class="panel-top">
+            <div>
+                <h2 id="datos-titulo">Datos del producto</h2>
+                <span class="count-badge" th:text="${modo == 'crear'} ? 'Alta' : 'Edición'">Alta</span>
+            </div>
+        </div>
+        <div class="panel-body">
+            <form method="post"
+                  th:action="${modo == 'crear'} ? @{/inventario/productos/nuevo} : @{/inventario/productos/{id}/editar(id=${productoId})}"
+                  th:object="${productoForm}">
+                <div class="fields">
+                    <label>
+                        <span>Código *</span>
+                        <input type="text" th:field="*{codigo}" maxlength="40" required placeholder="Ej. CAFE-01">
+                        <small class="aviso-campo" role="alert" th:if="${#fields.hasErrors('codigo')}"
+                               th:errors="*{codigo}"></small>
+                    </label>
+
+                    <label>
+                        <span>Nombre *</span>
+                        <input type="text" th:field="*{nombre}" maxlength="120" required placeholder="Ej. Café molido">
+                        <small class="aviso-campo" role="alert" th:if="${#fields.hasErrors('nombre')}"
+                               th:errors="*{nombre}"></small>
+                    </label>
+
+                    <label class="wide">
+                        <span>Descripción</span>
+                        <textarea th:field="*{descripcion}" maxlength="500" rows="3"
+                                  placeholder="Datos útiles para identificar el producto"></textarea>
+                        <small class="aviso-campo" role="alert" th:if="${#fields.hasErrors('descripcion')}"
+                               th:errors="*{descripcion}"></small>
+                    </label>
+
+                    <label>
+                        <span>Costo *</span>
+                        <input type="number" th:field="*{costo}" min="0" step="0.01" required>
+                        <small class="aviso-campo" role="alert" th:if="${#fields.hasErrors('costo')}"
+                               th:errors="*{costo}"></small>
+                    </label>
+
+                    <label>
+                        <span>Precio *</span>
+                        <input type="number" th:field="*{precio}" min="0" step="0.01" required>
+                        <small class="aviso-campo" role="alert" th:if="${#fields.hasErrors('precio')}"
+                               th:errors="*{precio}"></small>
+                    </label>
+
+                    <label>
+                        <span>Stock mínimo *</span>
+                        <input type="number" th:field="*{stockMinimo}" min="0" step="1" required>
+                        <small class="aviso-campo" role="alert" th:if="${#fields.hasErrors('stockMinimo')}"
+                               th:errors="*{stockMinimo}"></small>
+                    </label>
+                </div>
+
+                <div class="nota" th:if="${modo == 'editar'}">
+                    Stock actual: <strong th:text="${stockActual}">0</strong>.
+                    No se puede cambiar aquí; use una entrada o un ajuste.
+                </div>
+
+                <div class="form-actions">
+                    <a class="secondary" th:href="@{/inventario}">Cancelar</a>
+                    <button type="submit" class="primary"
+                            th:text="${modo == 'crear'} ? 'Crear producto' : 'Guardar cambios'">Guardar</button>
+                </div>
+            </form>
+        </div>
+        <div class="panel-foot">
+            <span>Los campos marcados con * son obligatorios.</span>
+            <span>Los importes usan dos decimales y las cantidades, números enteros.</span>
+        </div>
+    </section>
+</section>
+</html>

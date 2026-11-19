@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: pagina('Detalle de venta', 'ventas', ~{::contenido})}">
+<section th:fragment="contenido" aria-labelledby="detalle-venta-titulo">
+    <div class="page-heading">
+        <div>
+            <span class="eyebrow">VENTA CONFIRMADA</span>
+            <h1 id="detalle-venta-titulo" th:text="'Venta #' + ${venta.id}">Venta #0</h1>
+            <p th:text="${venta.fecha} + ' · ' + ${venta.estado} + ' · Moneda ' + ${venta.moneda}">Fecha</p>
+        </div>
+        <div class="heading-actions">
+            <a class="secondary" th:href="@{/ventas}">Volver al historial</a>
+        </div>
+    </div>
+
+    <div class="banner exito" th:if="${mensaje}" role="status" th:text="${mensaje}"></div>
+
+    <section class="stats" aria-label="Importes de la venta">
+        <div class="stat">
+            <div><span>Total productos</span><i><svg class="icono"><use href="#i-inventory"></use></svg></i></div>
+            <strong th:text="'$ ' + ${#numbers.formatDecimal(venta.totalProductos, 1, 2)}">$ 0.00</strong>
+            <small>Ítems de inventario</small>
+        </div>
+        <div class="stat">
+            <div><span>Total servicios</span><i><svg class="icono"><use href="#i-service"></use></svg></i></div>
+            <strong th:text="'$ ' + ${#numbers.formatDecimal(venta.totalServicios, 1, 2)}">$ 0.00</strong>
+            <small>Prestaciones registradas</small>
+        </div>
+        <div class="stat">
+            <div><span>Total de la venta</span><i><svg class="icono"><use href="#i-value"></use></svg></i></div>
+            <strong th:text="'$ ' + ${#numbers.formatDecimal(venta.total, 1, 2)}">$ 0.00</strong>
+            <small>Calculado en servidor</small>
+        </div>
+        <div class="stat">
+            <div><span>Atendida por</span><i><svg class="icono"><use href="#i-grid"></use></svg></i></div>
+            <strong th:text="${venta.usuarioNombre} ?: 'Anterior al login'">—</strong>
+            <small>Usuario autenticado</small>
+        </div>
+    </section>
+
+    <section class="panel" aria-labelledby="items-venta-titulo">
+        <div class="panel-top">
+            <div>
+                <h2 id="items-venta-titulo">Detalle histórico</h2>
+                <span class="count-badge" th:text="${#lists.size(venta.items)}">0</span>
+            </div>
+        </div>
+        <div class="table-scroll">
+            <table class="tabla">
+                <thead>
+                <tr><th>Tipo</th><th>Producto o servicio</th><th>Código</th><th>Cantidad</th><th>Precio aplicado</th><th>Subtotal</th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="item : ${venta.items}">
+                    <td data-label="Tipo">
+                        <span class="pill" th:classappend="${item.tipo == 'PRODUCTO'} ? 'neutral' : 'green'"
+                              th:text="${item.tipo}">PRODUCTO</span>
+                    </td>
+                    <td data-label="Producto o servicio"><strong th:text="${item.nombre}">Nombre</strong></td>
+                    <td data-label="Código"><span class="sku" th:text="${item.codigo}">COD</span></td>
+                    <td data-label="Cantidad" th:text="${item.cantidad}">0</td>
+                    <td data-label="Precio aplicado" th:text="'$ ' + ${#numbers.formatDecimal(item.precioUnitario, 1, 2)}">$ 0.00</td>
+                    <td data-label="Subtotal" th:text="'$ ' + ${#numbers.formatDecimal(item.subtotal, 1, 2)}">$ 0.00</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="panel-foot">
+            <span>Nombre, código y precio quedaron guardados con la venta, aunque el catálogo cambie después.</span>
+            <span>Clave de idempotencia: <span class="sku" th:text="${venta.claveIdempotencia}"></span></span>
+        </div>
+    </section>
+
+    <div class="bottom-note">
+        <svg class="icono"><use href="#i-history"></use></svg>
+        <div>
+            <strong>Venta inmutable</strong>
+            <p>En esta versión no hay edición, anulación ni borrado de ventas confirmadas.</p>
+        </div>
+    </div>
+</section>
+</html>

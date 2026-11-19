@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: pagina('Mi perfil', 'perfil', ~{::contenido})}">
+<section th:fragment="contenido" aria-labelledby="perfil-titulo">
+    <div class="page-heading">
+        <div>
+            <span class="eyebrow">CUENTA</span>
+            <h1 id="perfil-titulo">Mi perfil</h1>
+            <p>Actualice su nombre visible o cambie su contraseña. El correo no se modifica en esta actividad.</p>
+        </div>
+    </div>
+
+    <div class="banner exito" th:if="${mensaje}" role="status" th:text="${mensaje}"></div>
+
+    <div class="panel-grid">
+        <section class="panel" aria-labelledby="datos-titulo">
+            <div class="panel-top">
+                <div><h2 id="datos-titulo">Datos de la cuenta</h2></div>
+            </div>
+            <div class="panel-body">
+                <div class="banner error" th:if="${errorNombre}" role="alert" th:text="${errorNombre}"></div>
+                <form th:action="@{/perfil/nombre}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <div class="fields">
+                        <label class="wide">
+                            <span>Nombre</span>
+                            <input type="text" name="nombre" th:value="${usuario.nombre}" maxlength="120" required>
+                        </label>
+                        <label class="wide">
+                            <span>Usuario</span>
+                            <input type="text" th:value="${usuario.username}" disabled>
+                        </label>
+                        <label class="wide">
+                            <span>Correo</span>
+                            <input type="text" th:value="${usuario.email} ?: 'No registrado'" disabled>
+                        </label>
+                        <label class="wide">
+                            <span>Rol</span>
+                            <input type="text" th:value="${usuario.rol == 'ROLE_ADMIN'} ? 'Administrador' : 'Operador'" disabled>
+                        </label>
+                    </div>
+                    <div class="form-actions">
+                        <button class="primary" type="submit">Guardar nombre</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <section class="panel" aria-labelledby="password-titulo">
+            <div class="panel-top">
+                <div><h2 id="password-titulo">Cambiar contraseña</h2></div>
+            </div>
+            <div class="panel-body">
+                <div class="banner error" th:if="${errorPassword}" role="alert" th:text="${errorPassword}"></div>
+                <form th:action="@{/perfil/contrasena}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <div class="fields">
+                        <label class="wide">
+                            <span>Contraseña actual</span>
+                            <input type="password" name="actual" autocomplete="current-password" required>
+                        </label>
+                        <label class="wide">
+                            <span>Nueva contraseña</span>
+                            <input type="password" name="nueva" autocomplete="new-password" minlength="8" maxlength="72" required>
+                        </label>
+                        <label class="wide">
+                            <span>Confirmar nueva contraseña</span>
+                            <input type="password" name="confirmar" autocomplete="new-password" minlength="8" maxlength="72" required>
+                        </label>
+                    </div>
+                    <p class="help">Al cambiar la contraseña se cerrarán todas las sesiones anteriores.</p>
+                    <div class="form-actions">
+                        <button class="primary" type="submit">Actualizar contraseña</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </div>
+</section>
+</html>

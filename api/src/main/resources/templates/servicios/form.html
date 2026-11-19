@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: pagina('Servicios', 'servicios', ~{::contenido})}">
+<section th:fragment="contenido" aria-labelledby="servicio-form-titulo">
+    <div class="page-heading">
+        <div>
+            <span class="eyebrow">CATÁLOGO DE SERVICIOS</span>
+            <h1 id="servicio-form-titulo" th:text="${modo == 'crear'} ? 'Nuevo servicio' : 'Editar servicio'">Nuevo servicio</h1>
+            <p>El nombre es obligatorio y el precio fijo no puede ser negativo. Se guarda con dos decimales.</p>
+        </div>
+        <div class="heading-actions">
+            <a class="secondary" th:href="@{/servicios}">Volver a servicios</a>
+        </div>
+    </div>
+
+    <div class="banner error" th:if="${error}" role="alert" th:text="${error}"></div>
+
+    <section class="panel">
+        <div class="panel-body">
+            <form th:action="${modo == 'crear'} ? @{/servicios/nuevo} : @{/servicios/{id}/editar(id=${servicioId})}"
+                  th:object="${servicioForm}" method="post" class="formulario">
+                <div class="fields">
+                    <label>
+                        <span>Nombre *</span>
+                        <input type="text" th:field="*{nombre}" maxlength="120" required autofocus>
+                        <small class="aviso-campo" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></small>
+                    </label>
+                    <label>
+                        <span>Precio *</span>
+                        <input type="number" th:field="*{precio}" min="0" step="0.01" required>
+                        <small class="aviso-campo" th:if="${#fields.hasErrors('precio')}" th:errors="*{precio}"></small>
+                    </label>
+                    <label class="wide">
+                        <span>Descripción</span>
+                        <textarea th:field="*{descripcion}" maxlength="500" rows="4"
+                                  placeholder="Descripción opcional del servicio"></textarea>
+                        <small class="aviso-campo" th:if="${#fields.hasErrors('descripcion')}" th:errors="*{descripcion}"></small>
+                    </label>
+                </div>
+                <div class="form-actions">
+                    <a class="secondary" th:href="@{/servicios}">Cancelar</a>
+                    <button class="primary" type="submit"
+                            th:text="${modo == 'crear'} ? 'Crear servicio' : 'Guardar cambios'">Crear servicio</button>
+                </div>
+            </form>
+        </div>
+        <div class="panel-foot">
+            <span>Los servicios activos pueden agregarse a una venta.</span>
+            <span>Desactivar un servicio no elimina su historial.</span>
+        </div>
+    </section>
+</section>
+</html>

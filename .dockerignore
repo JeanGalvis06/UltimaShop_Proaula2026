@@ -1,0 +1,12 @@
+**
+!api/
+!api/**
+!infra/
+!infra/Dockerfile.api
+**/target/
+**/.env
+**/.env.*
+**/*.log
+**/*.log.err
+**/.git/
+**/backups/

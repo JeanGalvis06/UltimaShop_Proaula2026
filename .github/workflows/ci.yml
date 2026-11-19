@@ -1,0 +1,66 @@
+name: Java y Docker
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      publicar_imagen:
+        description: Publicar imagen en GHCR despues de pasar las pruebas
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      MAIL_ENABLED: "false"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+          cache-dependency-path: api/pom.xml
+      - name: Comprobar motor para Testcontainers
+        run: docker info
+      - name: Compilar y probar con PostgreSQL de Testcontainers
+        working-directory: api
+        run: bash ./mvnw -B -ntp clean verify
+      - name: Construir imagen sin publicar
+        run: docker build --file infra/Dockerfile.api --tag ultimashop-api:ci .
+
+  publicar:
+    if: github.event_name == 'workflow_dispatch' && inputs.publicar_imagen && github.ref == 'refs/heads/main'
+    needs: verificar
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Nombre de imagen
+        run: echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}/api" >> "$GITHUB_ENV"
+      - name: Autenticar con token temporal de GitHub
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+      - name: Construir y publicar version identificable
+        run: |
+          docker build -f infra/Dockerfile.api -t "$IMAGE:$GITHUB_SHA" .
+          docker push "$IMAGE:$GITHUB_SHA"
+      - name: Cerrar sesion del registro
+        if: always()
+        run: docker logout ghcr.io

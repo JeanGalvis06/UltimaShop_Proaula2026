@@ -1,0 +1,25 @@
+name: ultimashop-local-dev
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ultimashop-local-dev-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-ultimashop_dev}
+      POSTGRES_USER: ${DB_USER:-ultimashop_app}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Definir DB_PASSWORD en local-dev/.env}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - ultimashop-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+volumes:
+  ultimashop-postgres-data:
+    name: ultimashop-local-dev-postgres-data

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: pagina('Invitar usuario', 'usuarios', ~{::contenido})}">
+<section th:fragment="contenido" aria-labelledby="invitar-titulo">
+    <div class="page-heading">
+        <div>
+            <span class="eyebrow">USUARIOS</span>
+            <h1 id="invitar-titulo">Invitar usuario</h1>
+            <p>Se enviará un enlace para que la persona verifique su correo y establezca su contraseña. No se envían contraseñas por correo.</p>
+        </div>
+        <div class="heading-actions">
+            <a class="secondary" th:href="@{/usuarios}">Volver</a>
+        </div>
+    </div>
+
+    <section class="panel">
+        <div class="panel-body">
+            <div class="banner error" th:if="${error}" role="alert" th:text="${error}"></div>
+            <form th:action="@{/usuarios/nuevo}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <div class="fields">
+                    <label class="wide">
+                        <span>Nombre</span>
+                        <input type="text" name="nombre" th:value="${nombre}" maxlength="120" required>
+                    </label>
+                    <label class="wide">
+                        <span>Correo</span>
+                        <input type="email" name="correo" th:value="${correo}" maxlength="254" required>
+                    </label>
+                    <label class="wide">
+                        <span>Rol</span>
+                        <select name="rol" required>
+                            <option value="OPERADOR" th:selected="${rol == 'OPERADOR'}">Operador: ventas y consulta de inventario, servicios y movimientos</option>
+                            <option value="ADMIN" th:selected="${rol == 'ADMIN'}">Administrador: gestión de usuarios, productos, servicios, entradas y ajustes</option>
+                        </select>
+                    </label>
+                </div>
+                <p class="help">El enlace de invitación vence en 24 horas y solo puede usarse una vez.</p>
+                <div class="form-actions">
+                    <a class="secondary" th:href="@{/usuarios}">Cancelar</a>
+                    <button class="primary" type="submit">Crear invitación</button>
+                </div>
+            </form>
+        </div>
+    </section>
+</section>
+</html>
